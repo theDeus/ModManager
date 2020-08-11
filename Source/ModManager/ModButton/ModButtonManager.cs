@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Verse;
 using System.Linq;
+using Assets;
 using FluffyUI;
 using JetBrains.Annotations;
 using RimWorld;
@@ -234,7 +235,7 @@ namespace ModManager
             else
                 TryAdd( installed );
 
-            Page_BetterModConfig.Instance.Selected = installed;
+            //Page_BetterModConfig.Instance.Selected = installed;
             TryRemove(downloading);
             TryRemove(missing);
 

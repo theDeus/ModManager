@@ -547,8 +547,10 @@ namespace ModManager
             if ( !Versions.Any() )
             {
                 ModButtonManager.TryRemove(this);
+                /*
                 if ( Page_BetterModConfig.Instance.Selected == this )
                     Page_BetterModConfig.Instance.Selected = null;
+                */
                 return;
             }
             if ( Selected == version )

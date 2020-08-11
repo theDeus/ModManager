@@ -39,6 +39,7 @@ namespace ModManager
 
             if ( alternate )
                 Widgets.DrawBoxSolid( canvas, Resources.SlightlyDarkBackground );
+            /*
             if ( Page_BetterModConfig.Instance.Selected == this )
             {
                 if ( Page_BetterModConfig.Instance.SelectedHasFocus )
@@ -46,6 +47,7 @@ namespace ModManager
                 else
                     Widgets.DrawHighlight( canvas );
             }
+            */
             if ( !DraggingManager.Dragging )
                 HandleInteractions( canvas, clickAction, doubleClickAction );
         }

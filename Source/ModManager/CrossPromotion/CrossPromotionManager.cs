@@ -144,8 +144,8 @@ namespace ModManager
                     else
                     {
                         var button = ModButtonManager.AllButtons.FirstOrDefault( b => b.Name == promotion.Name );
-                        if ( button != null )
-                            Page_BetterModConfig.Instance.Selected = button;
+                        //if ( button != null )
+                        //    Page_BetterModConfig.Instance.Selected = button;
                     }
                 }
                 TooltipHandler.TipRegion( rect, promotion.Name + "\n\n" + promotion.Description );

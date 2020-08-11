@@ -59,7 +59,7 @@ namespace ModManager
                     // add dowloading item to MBM
                     var button = new ModButton_Downloading(pfid);
                     ModButtonManager.TryAdd(button);
-                    Page_BetterModConfig.Instance.Selected = button;
+                    //Page_BetterModConfig.Instance.Selected = button;
                 }
 
                 // do whatever needs doing for ScenarioLister.
