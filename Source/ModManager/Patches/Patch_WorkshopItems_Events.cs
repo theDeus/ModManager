@@ -52,13 +52,16 @@ namespace ModManager
                     Messages.Message(I18n.ModInstalled(mod.Name), MessageTypeDefOf.PositiveEvent, false);
 
                     // notify button manager that we done stuff.
-                    ModButtonManager.Notify_DownloadCompleted(mod);
+                    //TODO: add hook for download
+                    //ModButtonManager.Notify_DownloadCompleted(mod);
                 }
                 else
                 {
                     // add dowloading item to MBM
-                    var button = new ModButton_Downloading(pfid);
-                    ModButtonManager.TryAdd(button);
+                    //TODO: add hook for download
+                    //var button = new ModButton_Downloading(pfid);
+                    //ModButtonManager.TryAdd(button);
+
                     //Page_BetterModConfig.Instance.Selected = button;
                 }
 
@@ -85,7 +88,8 @@ namespace ModManager
                 modlister.TryRemove(mod);
 
                 // remove button
-                ModButtonManager.Notify_Unsubscribed( pfid.ToString() );
+                //TODO: add hook for download
+                //ModButtonManager.Notify_Unsubscribed( pfid.ToString() );
 
                 ScenarioLister.MarkDirty();
                 return false;
@@ -109,9 +113,10 @@ namespace ModManager
 
                 // show a message
                 Messages.Message( I18n.ModInstalled( mod.Name ), MessageTypeDefOf.PositiveEvent, false );
-                
+
                 // notify button manager that we done stuff.
-                ModButtonManager.Notify_DownloadCompleted( mod );
+                //TODO: add hook for download
+                //ModButtonManager.Notify_DownloadCompleted( mod );
 
                 ScenarioLister.MarkDirty();
                 return false;

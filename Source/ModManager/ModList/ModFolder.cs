@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assets.ModList
+namespace ModManager.ModList
 {
     [Serializable]
     public class ModFolder : ListElement

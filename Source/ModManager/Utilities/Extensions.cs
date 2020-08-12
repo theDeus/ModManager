@@ -99,15 +99,13 @@ namespace ModManager
 
         public static string AboutDir( this ModMetaData mod ) => Path.Combine( mod.RootDir.FullName, "About" );
 
-        public static ModAttributes Attributes( this ModMetaData mod )
-        {
-            return ModManager.Settings[mod];
-        }
-
         public static bool IsLocalCopy( this ModMetaData mod )
         {
+            /*
             return mod.Source == ContentSource.ModsFolder && 
                 mod.PackageId.StartsWith( IO.LocalCopyPrefix );
+            */
+            return false;
         }
         
         public static string StripSpaces( this string str )

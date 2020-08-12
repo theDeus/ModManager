@@ -4,13 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assets.ModList
+namespace ModManager.ModList
 {
     [Serializable]
     public class ListElement
     {
         protected string _name;
         public string Name => _name;
+
+        public int LoadOrder = 0;
+
+        public ListElement(int order = 0)
+        {
+            LoadOrder = order;
+        }
 
         public virtual bool Filter(ModFilter filter)
         {

@@ -11,10 +11,9 @@ using Verse;
 using static ModManager.Constants;
 using static ModManager.Resources;
 
-using Assets;
-using Assets.ModList;
+using ModManager.ModList;
 
-namespace Assets
+namespace ModManager
 {
     public enum Tabs
     {
@@ -22,6 +21,7 @@ namespace Assets
         Versions
     }
 
+    [HotSwappable]
     public class Page_BetterModConfig: Page_ModsConfig
     {
         public Rect windowRect = new Rect(20, 20, 1000, 600);
@@ -29,10 +29,10 @@ namespace Assets
         private Vector2 availableListScroll;
         private Vector2 activeListScroll;
 
-        public ModList.ModList AvailableMods = new ModList.ModList();
+        //public ModList.ModList AvailableMods = new ModList.ModList();
         public ModFilter availableFilter = new ModFilter();
 
-        public ModList.ModList ActiveMods = new ModList.ModList();
+        //public ModList.ModList ActiveMods = new ModList.ModList();
         public ModFilter activeFilter = new ModFilter();
 
 
@@ -55,11 +55,14 @@ namespace Assets
 
 
         private static Page_BetterModConfig _instance;
-        
+        public static Page_BetterModConfig Instance => _instance;
+
         public Page_BetterModConfig()
         {
-            dragged = null;
+            _instance = this;
 
+            dragged = null;
+            /*
             for (int i = 0; i < 5; i++)
             {
                 var mod = new ModInfo($"Mod no. {i}", $"Developer {i}");
@@ -78,9 +81,11 @@ namespace Assets
                 AvailableMods.Add(folder);
 
             }
+            */
+            ModListManager.LoadMods();
         }
 
-        public static Page_BetterModConfig Instance => _instance;
+        
 
         public override Vector2 InitialSize => StandardSize;
         public static Vector2 MinimumSize => StandardSize * 2 / 3f;
@@ -92,12 +97,17 @@ namespace Assets
 
         }
 
+        public override void PostClose()
+        {
+            base.PostClose();
+            ModListManager.FinalizeModLists();
+        }
 
         void DrawWindow(int i)
         {
             Rect label = new Rect(
-                20,
-                20,
+                0,
+                0,
                 windowRect.width,
                 20
                 );
@@ -115,14 +125,14 @@ namespace Assets
                 windowRect.height - 50
             );
 
-            ModList(availableRect, AvailableMods, availableFilter, ref availableListScroll);
+            ModList(availableRect, ModListManager.AvailableMods, availableFilter, ref availableListScroll);
 
 
             Rect activeRect = new Rect(availableRect);
             activeRect.x += modListWidth + 10;
 
 
-            ModList(activeRect, ActiveMods, activeFilter, ref activeListScroll);
+            ModList(activeRect, ModListManager.ActiveMods, activeFilter, ref activeListScroll);
 
 
             Rect modInfoRect = new Rect(activeRect);
@@ -141,7 +151,8 @@ namespace Assets
 
                 if (Event.current.type == EventType.MouseUp)
                 {
-                    AvailableMods.root.contents.Insert(draggedFrom, dragged);
+                    //TODO: record where the mod came form
+                    ModListManager.AvailableMods.root.contents.Insert(draggedFrom, dragged);
                     dragged = null;
 
                 }
@@ -204,7 +215,7 @@ namespace Assets
             Color color = string.IsNullOrEmpty(filter.filter) ? Color.black : Color.white;
 
             GUI.enabled = !string.IsNullOrEmpty(filter.filter);
-            if (Widgets.ButtonImage(clearButton, ModManager.Resources.Status_Cross, color))
+            if (Widgets.ButtonImage(clearButton, Resources.Status_Cross, color))
             {
                 filter.filter = "";
             }
@@ -212,7 +223,7 @@ namespace Assets
 
             Rect showButton = new Rect(clearButton);
             showButton.x -= SearchBarHeight + 2;
-            Texture2D texture = filter.HideNotMatching ? ModManager.Resources.EyeClosed : ModManager.Resources.EyeOpen;
+            Texture2D texture = filter.HideNotMatching ? Resources.EyeClosed : Resources.EyeOpen;
             if (Widgets.ButtonImage(showButton, texture))
             {
                 filter.HideNotMatching = !filter.HideNotMatching;
@@ -424,9 +435,18 @@ namespace Assets
 
                     GUILayout.Label("Versions Available:");
 
+                    bool hasActive = false;
                     foreach (var versionInfo in mod.version)
                     {
-                        GUILayout.Label($"{versionInfo.version}");
+                        versionInfo.active = GUILayout.Toggle(versionInfo.active,
+                            $"{versionInfo.version} for: {versionInfo.targetGameVersion} at: {versionInfo.path}");
+                        
+                        if (hasActive)
+                        {
+                            versionInfo.active = false;
+                        }
+                        hasActive = versionInfo.active;
+                        //GUILayout.Label();
                     }
 
                     GUILayout.EndVertical();

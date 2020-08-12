@@ -122,6 +122,7 @@ namespace ModManager
         private static Regex versionString = new Regex(@"(\[|\()?v?\d+(\.\d+)+|[A-B]\d{2}(\]|\))?", RegexOptions.IgnoreCase );
         public static string TrimModName( string name )
         {
+            /*
             if ( ModManager.Settings.TrimTags )
             {
                 name = authorTag.Replace( name, "" );
@@ -130,6 +131,7 @@ namespace ModManager
                     name = versionString.Replace( name, "" );
                 name = name.Trim().Trim( '-' ).Trim();
             }
+            */
 
             return name;
         }

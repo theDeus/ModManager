@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using RimWorld;
+using RimWorld.QuestGen;
+
 using Steamworks;
 using Verse;
 using Verse.Sound;
@@ -81,6 +83,9 @@ namespace ModManager
 
         public static void MassUnsubscribeFloatMenu()
         {
+            throw new NotImplementedException();
+            /*
+
             var options = Utilities.NewOptionsList;
             var steamMods = ModButtonManager.AllMods.Where( m => m.Source == ContentSource.SteamWorkshop );
             var outdated = steamMods.Where( m => !m.VersionCompatible && !m.MadeForNewerVersion );
@@ -92,6 +97,7 @@ namespace ModManager
             if ( inactive.Any() )
                 options.Add( new FloatMenuOption( I18n.MassUnSubscribeInactive, () => Unsubscribe( inactive ) ) );
             Utilities.FloatMenu( options );
+            */
         }
     }
 }

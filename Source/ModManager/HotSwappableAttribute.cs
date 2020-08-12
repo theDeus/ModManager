@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assets
+namespace ModManager
 {
-    public class ModFilter
+    [AttributeUsage(AttributeTargets.Class)]
+    public class HotSwappableAttribute : Attribute
     {
-        public string filter;
-        public bool HideNotMatching;
     }
 }

@@ -1,6 +1,7 @@
 ﻿// I18n.cs
 // Copyright Karel Kroeze, 2018-2018
 
+using System;
 using System.Collections.Generic;
 using RimWorld;
 using Steamworks;
@@ -78,19 +79,21 @@ namespace ModManager
         {
             return Key( "DependencyUnknownVersion" ).Translate( tgt.Name );
         }
-
+        /*
         public static string DependencyWrongVersion( ModMetaData tgt, VersionedDependency depend )
         {
-            return Key( "DependencyWrongVersion" )
-               .Translate( tgt.Name, depend.Range.ToString(), tgt.GetManifest().Version.ToString() );
+            //return Key( "DependencyWrongVersion" )
+            //   .Translate( tgt.Name, depend.Range.ToString(), tgt.GetManifest().Version.ToString() );
+            throw new NotImplementedException();
         }
-
+        */
         public static string DependencyNotActive( ModMetaData tgt ) =>
             Key( "DependencyNotActive" ).Translate( tgt.Name );
 
         public static string DependencyMet( ModMetaData tgt )
         {
-            return Key( "DependencyMet" ).Translate( tgt.Name, tgt.GetManifest()?.Version.ToString() ?? "[?]" );
+            //return Key( "DependencyMet" ).Translate( tgt.Name, tgt.GetManifest()?.Version.ToString() ?? "[?]" );
+            throw new NotImplementedException();
         }
 
         public static string IncompatibleMod( string name )
@@ -275,8 +278,9 @@ namespace ModManager
 
         public static string ActivateMod( ModMetaData mod )
         {
-            return Key( "ActivateMod" ).Translate( mod.Name, Manifest.For( mod )?.Version.ToString(),
-                                                   Key( "ContentSource", mod.Source.ToString() ).Translate() );
+            //return Key( "ActivateMod" ).Translate( mod.Name, Manifest.For( mod )?.Version.ToString(),
+            //                                       Key( "ContentSource", mod.Source.ToString() ).Translate() );
+            throw new NotImplementedException();
         }
 
 //        public static string NoMatchingModInstalled(string name, Version desired, Dependency.EqualityOperator op )
@@ -290,7 +294,7 @@ namespace ModManager
             return Key( "NoMatchingModInstalled" )
                .Translate( name, VersionControl.CurrentMajor + "." + VersionControl.CurrentMinor );
         }
-
+        /*
         public static string DeactivateMod( ModButton_Installed mod )
         {
             return Key( "DeactivateMod" ).Translate( TrimModName( mod.Name ) );
@@ -305,7 +309,7 @@ namespace ModManager
         {
             return Key( "MoveAfter" ).Translate( TrimModName( from.Name ), TrimModName( to.Name ) );
         }
-
+        */
         public static string SourceModChanged = Key( "SourceModChanged" ).Translate();
 
         public static string UpdateLocalCopy( string name )
