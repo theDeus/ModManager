@@ -15,6 +15,13 @@ namespace ModManager.ModList
     {
         public ModFolder root = new ModFolder("Root");
 
+        public bool activeity { get; private set; }
+
+        public ModList(bool active)
+        {
+            this.activeity = active;
+        }
+
         //TODO: cash?
         public int ModCount => CountMods(this.root);
 
@@ -59,7 +66,7 @@ namespace ModManager.ModList
             {
                 if (element is ModInfo mod)
                 {
-                    data.AddRange(mod.version.Select(m => m.ModMeta));
+                    data.AddRange(mod.versions.Select(m => m.ModMeta));
                 }
                 else if (element is ModFolder folder)
                 {

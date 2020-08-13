@@ -24,7 +24,7 @@ namespace ModManager.ModList
             foreach (var mods in ModLister.AllInstalledMods.GroupBy(m => m.PackageIdNonUnique))
             {
                 ModInfo inf = new ModInfo(mods.ToList());
-                if (mods.Any(m => m.Active))
+                if (inf.active)
                 {
                     ActiveMods.Add(inf);
                 }
@@ -43,12 +43,12 @@ namespace ModManager.ModList
         {
             List<ModMetaData> metaDatas = ActiveMods.ModMetaData;
 
-            List<string> active = metaDatas.Select(m => m.PackageId).ToList();
+            List<string> active = metaDatas.FindAll(m=>m.Active).Select(m => m.PackageId).ToList();
 
 
             ModsConfig.SetActiveToList(active);
 
-            ModsConfig.Save();
+            //ModsConfig.Save();
         }
     }
 }

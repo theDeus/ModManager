@@ -436,7 +436,7 @@ namespace ModManager
                     GUILayout.Label("Versions Available:");
 
                     bool hasActive = false;
-                    foreach (var versionInfo in mod.version)
+                    foreach (var versionInfo in mod.versions)
                     {
                         versionInfo.active = GUILayout.Toggle(versionInfo.active,
                             $"{versionInfo.version} for: {versionInfo.targetGameVersion} at: {versionInfo.path}");
