@@ -76,7 +76,7 @@ namespace ModManager
                 folder.open = false;
                 for (int j = 5; j < 12; j++)
                 {
-                    folder.contents.Add(new ModInfo($"Mod in folder no.{i} - {j}", $"Developer {i}"));
+                    folder.Contents.Add(new ModInfo($"Mod in folder no.{i} - {j}", $"Developer {i}"));
                 }
                 AvailableMods.Add(folder);
 
@@ -152,7 +152,8 @@ namespace ModManager
                 if (Event.current.type == EventType.MouseUp)
                 {
                     //TODO: record where the mod came form
-                    ModListManager.AvailableMods.root.contents.Insert(draggedFrom, dragged);
+                    //ModListManager.AvailableMods.root.Contents.Insert(draggedFrom, dragged);
+                    ModListManager.AvailableMods.root.Add(draggedFrom, dragged);
                     dragged = null;
 
                 }
@@ -195,7 +196,7 @@ namespace ModManager
             // Begin the ScrollView
             scroll = GUI.BeginScrollView(scrollArea, scroll, scrollInner, false, true);
 
-            CardDropZone(scrollInner, list.root.contents, filter);
+            CardDropZone(scrollInner, list.root, filter);
 
 
 
@@ -248,7 +249,7 @@ namespace ModManager
         }
 
 
-        void CardDropZone(Rect rect, List<ListElement> list, ModFilter filter)
+        void CardDropZone(Rect rect, ModFolder list, ModFilter filter)
         {
             Rect modRect = new Rect(
                 rect.xMin,
@@ -261,19 +262,19 @@ namespace ModManager
 
             if (dragged != null && Event.current.type == EventType.MouseUp)
             {
-                if (list.Count < 1)
-                    list.Insert(0, dragged);
+                if (list.Contents.Count < 1)
+                    list.Add(0, dragged);
                 else
-                    list.Insert(list.Count, dragged);
+                    list.Add(list.Contents.Count, dragged);
                 dragged = null;
             }
         }
 
-        private void DrawTreeElements(List<ListElement> list, ModFilter filter, ref Rect modRect)
+        private void DrawTreeElements(ModFolder list, ModFilter filter, ref Rect modRect)
         {
-            for (int j = 0; j < list.Count; j++)
+            for (int j = 0; j < list.Contents.Count; j++)
             {
-                ListElement item = list[j];
+                ListElement item = list.Contents[j];
 
                 if (!item.Filter(filter))
                 {
@@ -314,7 +315,7 @@ namespace ModManager
                     {
                         if (dragged != null)
                         {
-                            list.Insert(j, dragged);
+                            list.Add(j, dragged);
                             dragged = null;
                         }
                         else if (item is ModFolder folder)
@@ -348,7 +349,7 @@ namespace ModManager
                     {
                         modRect.x += 20;
 
-                        DrawTreeElements(modFolder.contents, filter, ref modRect);
+                        DrawTreeElements(modFolder, filter, ref modRect);
 
                         modRect.x -= 20;
                     }
@@ -435,19 +436,27 @@ namespace ModManager
 
                     GUILayout.Label("Versions Available:");
 
-                    bool hasActive = false;
-                    foreach (var versionInfo in mod.versions)
+                    GUI.enabled = mod.modList.activeity;
+
+                    List<string> text = new List<string>();
+                    for (var i = 0; i < mod.versions.Count; i++)
                     {
-                        versionInfo.active = GUILayout.Toggle(versionInfo.active,
+                        var versionInfo = mod.versions[i];
+
+                        bool status = versionInfo.active;
+
+                        status = GUILayout.Toggle(status,
                             $"{versionInfo.version} for: {versionInfo.targetGameVersion} at: {versionInfo.path}");
-                        
-                        if (hasActive)
-                        {
-                            versionInfo.active = false;
-                        }
-                        hasActive = versionInfo.active;
+                        if (status != versionInfo.active)
+                            mod.SetActiveVersion(status, i);
+
+
+                        //mod.SetActiveVersion(true, selected);
+
                         //GUILayout.Label();
                     }
+
+                    GUI.enabled = true;
 
                     GUILayout.EndVertical();
                     GUILayout.EndArea();

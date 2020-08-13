@@ -14,6 +14,8 @@ namespace ModManager.ModList
 
         public int LoadOrder = 0;
 
+        public ModList modList; 
+
         public ListElement(int order = 0)
         {
             LoadOrder = order;

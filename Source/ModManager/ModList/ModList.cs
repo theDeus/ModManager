@@ -19,6 +19,7 @@ namespace ModManager.ModList
 
         public ModList(bool active)
         {
+            root.modList = this;
             this.activeity = active;
         }
 
@@ -27,8 +28,8 @@ namespace ModManager.ModList
 
         public static int CountMods(ModFolder list)
         {
-            int count = list.contents.Count;
-            foreach (var element in list.contents)
+            int count = list.Contents.Count;
+            foreach (var element in list.Contents)
             {
                 if (element is ModFolder folder)
                     count += CountMods(folder);
@@ -39,7 +40,14 @@ namespace ModManager.ModList
 
         public void Add(ListElement element)
         {
-            root.contents.Add(element);
+            element.modList = this;
+
+            //root.Contents.Add(element);
+            root.Add(-1, element);
+            if (element is ModInfo mod && activeity)
+            {
+                mod.ActivateDefault();
+            }
         }
 
         /// <summary>
@@ -47,14 +55,12 @@ namespace ModManager.ModList
         /// </summary>
         public void Clear()
         {
-            root.contents.Clear();
+            root.Clear();
         }
 
         public void Sort()
         {
-            root.contents = root.contents
-                .OrderBy(b => b.LoadOrder)
-                .ToList();
+            root.Sort();
         }
 
         public List<ModMetaData> ModMetaData => GetModMetaDataList(this.root);
@@ -62,7 +68,7 @@ namespace ModManager.ModList
         List<ModMetaData> GetModMetaDataList(ModFolder list)
         {
             List<ModMetaData> data = new List<ModMetaData>();
-            foreach (var element in list.contents)
+            foreach (var element in list.Contents)
             {
                 if (element is ModInfo mod)
                 {

@@ -10,9 +10,9 @@ namespace ModManager.ModList
 {
     public class ModListManager
     {
-        public static ModList AvailableMods = new ModList();
+        public static ModList AvailableMods = new ModList(false);
 
-        public static ModList ActiveMods = new ModList();
+        public static ModList ActiveMods = new ModList(true);
 
 
         public static void LoadMods()
@@ -24,7 +24,7 @@ namespace ModManager.ModList
             foreach (var mods in ModLister.AllInstalledMods.GroupBy(m => m.PackageIdNonUnique))
             {
                 ModInfo inf = new ModInfo(mods.ToList());
-                if (inf.active)
+                if (inf.Active)
                 {
                     ActiveMods.Add(inf);
                 }
@@ -47,8 +47,8 @@ namespace ModManager.ModList
 
 
             ModsConfig.SetActiveToList(active);
-
-            //ModsConfig.Save();
+            
+            ModsConfig.Save();
         }
     }
 }

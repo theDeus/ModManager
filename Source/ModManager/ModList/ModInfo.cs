@@ -24,7 +24,10 @@ namespace ModManager.ModList
         public string author { get; private set; }
         public string id { get; private set; }
 
-        public bool active { get; private set; }
+        /// <summary>
+        /// Shows if any of the versions are enabled
+        /// </summary>
+        public bool Active => versions.Any(v => v.active);
 
         public ModInfo(string name, string author, int order): base(order)
         {
@@ -55,27 +58,30 @@ namespace ModManager.ModList
                 versions.Add(new ModVersionInfo(ver));
             }
 
-            this.active = versions.Any(v => v.active);
+            //this.active = versions.Any(v => v.active);
         }
 
-        public void SetActive(bool status)
+        public void ActivateDefault()
         {
-            ModVersionInfo activeVersion = versions.Find(v => v.active);
-            
-            if (status && activeVersion == null)
+            var currentActiveVersion = versions.Find(v => v.active);
+            if (currentActiveVersion == null)
             {
                 //We activate the steam version by default or the first one if there is no steam version
-                activeVersion = versions.Find(v => v.source == ModSource.Steam);
-                if (activeVersion != null)
-                    activeVersion = versions[0];
+                var nextActiveVersion = versions.Find(v => v.source == ModSource.Steam);
+                if (nextActiveVersion == null)
+                    nextActiveVersion = versions[0];
 
-                activeVersion!.active = true;
+                nextActiveVersion.active = true;
             }
-            else
-            {
-                if (activeVersion != null)
-                    activeVersion.active = false;
-            }
+        }
+
+        public void SetActiveVersion(bool status, int i)
+        {
+            var currentActiveVersion = versions.Find(v => v.active);
+            if(currentActiveVersion != null)
+                currentActiveVersion.active = false;
+
+            versions[i].active = status;
         }
     }
 
@@ -109,6 +115,11 @@ namespace ModManager.ModList
             targetGameVersion = data.TargetVersion;
 
             source = data.OnSteamWorkshop ? ModSource.Steam : ModSource.Folder;
+
+            if (active)
+            {
+                Verse.Log.Message($"{data.Name} {data.Active} {data.RootDir.FullName}");
+            }
         }
     }
 
