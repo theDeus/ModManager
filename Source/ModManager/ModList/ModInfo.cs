@@ -29,6 +29,10 @@ namespace ModManager.ModList
         /// </summary>
         public bool Active => versions.Any(v => v.active);
 
+        public string PreviewImagePath => (Active) ?
+                    versions.Find(m => m.active).ModMeta.PreviewImagePath :
+                    versions[0].ModMeta.PreviewImagePath;
+
         public ModInfo(string name, string author, int order): base(order)
         {
             this._name = name;
