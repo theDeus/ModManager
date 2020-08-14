@@ -461,10 +461,30 @@ namespace ModManager
                     GUILayout.EndVertical();
                     GUILayout.EndArea();
                 }
+
+                DrawModPreviewImage(prewImg, mod);
             }
 
         }
 
+        void DrawModPreviewImage(Rect previewImage, ModInfo mod)
+        {
+            try
+            {
+                string previewImagePath = (mod.Active) ? 
+                    mod.versions.Find(m => m.active).ModMeta.PreviewImagePath : 
+                    mod.versions[0].ModMeta.PreviewImagePath;
+                //Texture size doesn't matter. Resizes on loadImage.
+                Texture2D texture = new Texture2D(2, 2);
+                texture.LoadImage(System.IO.File.ReadAllBytes(previewImagePath));
+
+                GUI.DrawTexture(previewImage, texture, ScaleMode.ScaleToFit);
+            }
+            catch (System.IO.FileNotFoundException e)
+            {
+                //Cant find any preview image. Do nothing, to leave an empty box.
+            }
+        }
 
     }
 }
