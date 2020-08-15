@@ -60,6 +60,10 @@ namespace ModManager
         public Page_BetterModConfig()
         {
             _instance = this;
+            closeOnAccept = false;
+            closeOnCancel = true;
+            doCloseButton = false;
+            doCloseX = true;
 
             dragged = null;
             /*
