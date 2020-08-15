@@ -473,18 +473,7 @@ namespace ModManager
 
         void DrawModPreviewImage(Rect previewImage, ModInfo mod)
         {
-            try
-            {
-                //Texture size doesn't matter. Resizes on loadImage.
-                Texture2D texture = new Texture2D(2, 2);
-                texture.LoadImage(System.IO.File.ReadAllBytes(mod.PreviewImagePath));
-
-                GUI.DrawTexture(previewImage, texture, ScaleMode.ScaleToFit);
-            }
-            catch (System.IO.FileNotFoundException e)
-            {
-                //Cant find any preview image. Do nothing, to leave an empty box.
-            }
+            GUI.DrawTexture(previewImage, mod.PreviewVersionInfo.ModMeta.PreviewImage, ScaleMode.ScaleToFit);
         }
 
     }
