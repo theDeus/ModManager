@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using RimWorld.Planet;
 
 using System;
 using System.Collections.Generic;
@@ -15,12 +16,20 @@ namespace ModManager.ModList
     {
         public ModFolder root = new ModFolder("Root");
 
-        public bool activeity { get; private set; }
+        /// <summary>
+        /// If the mods in this list are active
+        /// </summary>
+        /// 
+        /// Weather this modlist is the active mods list.
+        /// if so than mods added to this list wee be activated.
+        public bool Active { get; private set; }
 
-        public ModList(bool active)
+        public ModList(bool active, string name)
         {
             root.modList = this;
-            this.activeity = active;
+            this.Active = active;
+
+            root.SetName(name);
         }
 
         //TODO: cash?
@@ -38,13 +47,23 @@ namespace ModManager.ModList
             return count;
         }
 
+        public void SetActive(bool state)
+        {
+            Active = state;
+
+            foreach (var item in this.root.Contents)
+            {
+                item.SetActive(Active);
+            }
+        }
+
         public void Add(ListElement element)
         {
             element.modList = this;
 
             //root.Contents.Add(element);
             root.Add(-1, element);
-            if (element is ModInfo mod && activeity)
+            if (element is ModInfo mod && Active)
             {
                 mod.ActivateDefault();
             }
@@ -63,6 +82,44 @@ namespace ModManager.ModList
             root.Sort();
         }
 
+        /// <summary>
+        /// Merges an other mod list into this.
+        /// </summary>
+        /// <param name="list">The list to merge</param>
+        /// It matches the folders and merges them if available
+        public void Merge(ModList list)
+        {
+            foreach (var item in list.root.Contents)
+            {
+                if (item is ModInfo mod)
+                {
+                    this.root.Add(-1, mod);
+                }
+                else if (item is ModFolder folder)
+                {
+                    ModFolder other_folder = (ModFolder)this.root.Contents.Where(i =>
+                    {
+                        return i is ModFolder fol
+                            && fol.Name == folder.Name;
+                    }).First();
+
+                    if(other_folder!=null)
+                    foreach (var c in folder.Contents)
+                    {
+                        other_folder.Add(-1, c);
+                    }
+                }
+            }
+        }
+
+        public void Remove(ModList list)
+        {
+            foreach (var item in list.root.Contents)
+            {
+                this.root.Remove(item);
+            }
+        }
+
         public List<ModMetaData> ModMetaData => GetModMetaDataList(this.root);
 
         List<ModMetaData> GetModMetaDataList(ModFolder list)
@@ -72,7 +129,7 @@ namespace ModManager.ModList
             {
                 if (element is ModInfo mod)
                 {
-                    data.AddRange(mod.versions.Select(m => m.ModMeta));
+                    data.Add(mod.ActiveVersion.ModMeta);
                 }
                 else if (element is ModFolder folder)
                 {

@@ -15,14 +15,17 @@ using Verse;
 
 namespace ModManager.ModList
 {
-    [Serializable]
+    //We can have multiple versions installed either a local and a steam version
+    //Or multiple local
+
+
     public class ModInfo: ListElement
     {
-        //We can have multiple versions installed either a local and a steam
-        //Or multiple local
+
         public List<ModVersionInfo> versions = new List<ModVersionInfo>();
         public string author { get; private set; }
         public string id { get; private set; }
+
 
         /// <summary>
         /// Shows if any of the versions are enabled
@@ -30,11 +33,23 @@ namespace ModManager.ModList
         public bool Active => versions.Any(v => v.active);
 
         /// <summary>
+        /// The active version of this mod
+        /// </summary>
+        public ModVersionInfo ActiveVersion => versions.Find(v => v.active);
+
+        /// <summary>
         /// Returns the active version info (or first in the list if none active).
         /// </summary>
-        public ModVersionInfo PreviewVersionInfo => (Active) ?
-                    versions.Find(m => m.active) :
-                    versions[0];
+        public ModVersionInfo PreviewVersionInfo => (Active) ? versions.Find(m => m.active) : versions[0];
+
+        /// <summary>
+        /// The description for this mod
+        /// </summary>
+        /// It is the description of the prewiew mod
+        public string Description => PreviewVersionInfo.ModMeta.Description;
+
+
+
 
         public ModInfo(string name, string author, int order): base(order)
         {
@@ -67,6 +82,26 @@ namespace ModManager.ModList
 
             //this.active = versions.Any(v => v.active);
         }
+
+        public override bool Equals(object obj)
+        {
+            if(obj is ModInfo other)
+            {
+                return other.id == this.id;
+            }
+            return false;
+        }
+
+        public override void SetActive(bool act)
+        {
+            if (act)
+                ActivateDefault();
+            else if (ActiveVersion != null)
+                ActiveVersion.active = false;
+        }
+
+        public override bool GetActive() => Active;
+
 
         public void ActivateDefault()
         {

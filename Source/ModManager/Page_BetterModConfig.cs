@@ -1,7 +1,4 @@
-﻿// Window_ModSelection.cs
-// Copyright Karel Kroeze, 2018-2018
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -24,15 +21,12 @@ namespace ModManager
     [HotSwappable]
     public class Page_BetterModConfig: Page_ModsConfig
     {
-        public Rect windowRect = new Rect(20, 20, 1000, 600);
+        public Rect windowRect = new Rect(0, 0, Screen.width, Screen.height);
 
         private Vector2 availableListScroll;
         private Vector2 activeListScroll;
 
-        //public ModList.ModList AvailableMods = new ModList.ModList();
         public ModFilter availableFilter = new ModFilter();
-
-        //public ModList.ModList ActiveMods = new ModList.ModList();
         public ModFilter activeFilter = new ModFilter();
 
 
@@ -50,8 +44,9 @@ namespace ModManager
         private int ModCardSpacing = 2;
 
         private int ModListInfoCardHeight = 60;
-        private int SearchBarHeight = 20;
 
+
+        private Vector2 detailsScroll;
 
 
         private static Page_BetterModConfig _instance;
@@ -66,6 +61,8 @@ namespace ModManager
             doCloseX = true;
 
             dragged = null;
+
+
             /*
             for (int i = 0; i < 5; i++)
             {
@@ -89,9 +86,9 @@ namespace ModManager
             ModListManager.LoadMods();
         }
 
-        
 
-        public override Vector2 InitialSize => StandardSize;
+
+        public override Vector2 InitialSize => new Vector2(Screen.width, Screen.height);
         public static Vector2 MinimumSize => StandardSize * 2 / 3f;
 
         public override void DoWindowContents( Rect canvas )
@@ -107,6 +104,8 @@ namespace ModManager
             ModListManager.FinalizeModLists();
         }
 
+
+
         void DrawWindow(int i)
         {
             Rect label = new Rect(
@@ -115,7 +114,7 @@ namespace ModManager
                 windowRect.width,
                 20
                 );
-            GUI.Label(label, "asdasdasdasdad");
+            GUI.Label(label, "Mod Manager");
 
 
             modListWidth = windowRect.width / 4;
@@ -168,33 +167,23 @@ namespace ModManager
         void ModList(Rect rect, ModList.ModList list, ModFilter filter, ref Vector2 scroll)
         {
 
-            Rect modInfoRect = new Rect(
-                rect.x,
-                rect.y,
-                rect.width,
-                ModListInfoCardHeight
-            );
+            //Mod List info 
+            Rect modInfoRect = new Rect(rect.x, rect.y, rect.width, ModListInfoCardHeight);
             DrawModListInfoCard(modInfoRect, list);
 
-            Rect modSearchRect = new Rect(modInfoRect);
-            modSearchRect.y += ModListInfoCardHeight + 2;
-            modSearchRect.height = 20;
-            DrawModFilter(modSearchRect, filter);
+            //Mod search bar
+            Rect modSearchRect = UIHelpers.GetNextDown(modInfoRect, ManagerUI.SearchBarHeight);
+            ManagerUI.DrawModFilter(modSearchRect, filter);
 
-
-            Rect scrollArea = new Rect(modSearchRect);
-            scrollArea.y += 22;
-            scrollArea.height = rect.height - ModListInfoCardHeight - 20;
+            //#################################
+            //Mod scrolling area
+            //#################################
+            float scrollHeight = rect.height - ModListInfoCardHeight - ManagerUI.SearchBarHeight - 40;
+            Rect scrollArea = UIHelpers.GetNextDown(modSearchRect, scrollHeight, 2);
 
             float innerHeight = ((ModButtonHeight + ModCardSpacing) * list.ModCount) + 10;
-            Rect scrollInner = new Rect(
-                0,
-                0,
-                ModButtonWidth,
-                innerHeight
-            );
+            Rect scrollInner = new Rect(0, 0, ModButtonWidth, innerHeight);
 
-            //EditorGUI.DrawRect(scrollArea, Color.gray);
             Widgets.DrawBoxSolid(scrollArea, Color.gray);
 
             // Begin the ScrollView
@@ -202,46 +191,38 @@ namespace ModManager
 
             CardDropZone(scrollInner, list.root, filter);
 
-
-
             // End the ScrollView
             GUI.EndScrollView();
+
+            //Bottom menu
+            Rect bottomMenu = UIHelpers.GetNextDown(scrollArea, 30, 10);
+            Widgets.DrawBoxSolid(bottomMenu, Color.black);
+
+
+            Rect button = new Rect(bottomMenu);
+            button.width = button.height;
+            if (Widgets.ButtonImage(button, Resources.delete_empty, ManagerUI.GetActiveColor(true)))
+            {
+                ModListManager.CleanActiveModsList();
+                selected = null;
+            }
+
+
+
         }
 
-        private void DrawModFilter(Rect rect, ModFilter filter)
-        {
-            Rect searchFiled = new Rect(rect);
-            searchFiled.width -= (SearchBarHeight * 2) + 4;
-            filter.filter = Widgets.TextField(searchFiled, filter.filter);
-
-            Rect clearButton = new Rect(rect);
-            clearButton.xMin = clearButton.xMax - SearchBarHeight;
-
-            Color color = string.IsNullOrEmpty(filter.filter) ? Color.black : Color.white;
-
-            GUI.enabled = !string.IsNullOrEmpty(filter.filter);
-            if (Widgets.ButtonImage(clearButton, Resources.Status_Cross, color))
-            {
-                filter.filter = "";
-            }
-            GUI.enabled = true;
-
-            Rect showButton = new Rect(clearButton);
-            showButton.x -= SearchBarHeight + 2;
-            Texture2D texture = filter.HideNotMatching ? Resources.EyeClosed : Resources.EyeOpen;
-            if (Widgets.ButtonImage(showButton, texture))
-            {
-                filter.HideNotMatching = !filter.HideNotMatching;
-            }
-        }
+        
 
         private void DrawModListInfoCard(Rect modInfoRect, ModList.ModList list)
         {
+            //       Mod pack name
+            //
+            //                      # of mods
+
 
             GUI.Box(modInfoRect, list.root.Name);
 
             Rect modCountRect = new Rect(modInfoRect);
-            modCountRect.yMin = modCountRect.yMax - SearchBarHeight;
             modCountRect.width -= 5;
 
             //EditorGUI.DrawRect(modCountRect, Color.red);
@@ -392,6 +373,9 @@ namespace ModManager
             prewImg.height = (prewImg.height / 2) - 50;
             //EditorGUI.DrawRect(prewImg, Color.black);
             Widgets.DrawBoxSolid(prewImg, Color.black);
+
+            
+
             //GUI.DrawTexture(prewImg, mod_prew, ScaleMode.ScaleToFit);
 
             Rect modData = new Rect(prewImg);
@@ -407,6 +391,8 @@ namespace ModManager
 
             if (element is ModInfo mod)
             {
+                DrawModPreviewImage(prewImg, mod);
+
                 nameRect.y += 20;
                 GUI.Label(nameRect, $"Author: {mod.author}");
 
@@ -431,7 +417,17 @@ namespace ModManager
                 Widgets.DrawBoxSolid(tabPanel, Color.gray);
                 if (tabSelected == Tabs.Details)
                 {
+                    Rect inner = new Rect(tabPanel);
+                    inner.xMin += 10;
+                    inner.xMax -= 20;
+                    inner.height = Text.CalcHeight(mod.Description, inner.width);
 
+
+                    detailsScroll = GUI.BeginScrollView(tabPanel, detailsScroll, inner, false, true);
+
+                    GUI.Label(inner, mod.Description);
+                    
+                    GUI.EndScrollView();
                 }
                 else if (tabSelected == Tabs.Versions)
                 {
@@ -440,7 +436,7 @@ namespace ModManager
 
                     GUILayout.Label("Versions Available:");
 
-                    GUI.enabled = mod.modList.activeity;
+                    GUI.enabled = mod.modList.Active;
 
                     List<string> text = new List<string>();
                     for (var i = 0; i < mod.versions.Count; i++)
@@ -465,8 +461,6 @@ namespace ModManager
                     GUILayout.EndVertical();
                     GUILayout.EndArea();
                 }
-
-                DrawModPreviewImage(prewImg, mod);
             }
 
         }

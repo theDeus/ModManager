@@ -1,4 +1,8 @@
-﻿using System;
+﻿using HarmonyLib;
+
+using RimWorld.Planet;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -10,10 +14,11 @@ namespace ModManager.ModList
 {
     public class ModListManager
     {
-        public static ModList AvailableMods = new ModList(false);
+        public static ModList AvailableMods = new ModList(false, "Available Mods");
 
-        public static ModList ActiveMods = new ModList(true);
+        public static ModList ActiveMods = new ModList(true, "Active Mods");
 
+        
 
         public static void LoadMods()
         {
@@ -45,10 +50,46 @@ namespace ModManager.ModList
 
             List<string> active = metaDatas.FindAll(m=>m.Active).Select(m => m.PackageId).ToList();
 
+            string a = active.StringJoin(", ");
+
+            Debug.Log(a);
 
             ModsConfig.SetActiveToList(active);
             
             ModsConfig.Save();
         }
+
+        public static void ActivateModList(ModList list)
+        {
+            //Unload all current mods
+            AvailableMods.Merge(ActiveMods);
+            ActiveMods.root.Empty();
+
+            //Set new mod list
+            ActiveMods = list;
+
+            //Remove in use mods from available list
+            AvailableMods.Remove(ActiveMods);
+
+            ActiveMods.SetActive(true);
+        }
+
+        public static ModList GetDefaultModList()
+        {
+            var list = new ModList(false, "Default");
+
+            list.Add(new ModInfo(ModLister.AllInstalledMods.Where(i => i.PackageIdNonUnique == "brrainz.harmony").ToList()));
+            list.Add(new ModInfo(ModLister.AllInstalledMods.Where(i => i.PackageIdNonUnique == "ludeon.rimworld").ToList()));
+            list.Add(new ModInfo(ModLister.AllInstalledMods.Where(i => i.PackageIdNonUnique == "fluffy.modmanager").ToList()));
+
+            return list;
+        }
+
+        public static void CleanActiveModsList()
+        {
+            ActivateModList(GetDefaultModList());
+        }
+
+
     }
 }

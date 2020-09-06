@@ -102,6 +102,7 @@ This is version 2.11.901, for RimWorld 1.1.2654.
 </description>
   <supportedVersions>
     <li>1.1</li>
+	<li>1.2</li>
   </supportedVersions>
   <modDependencies>
     <li>
