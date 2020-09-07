@@ -17,7 +17,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>../../Assemblies</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -44,8 +44,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\__LocalCopy_Harmony__8_8\Current\Assemblies\0Harmony.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\__LocalCopy_Harmony_-5-9\Current\Assemblies\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
@@ -98,6 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HotSwappableAttribute.cs" />
+    <Compile Include="ManagerUI.cs" />
     <Compile Include="ModList\ListElement.cs" />
     <Compile Include="ModList\ModFolder.cs" />
     <Compile Include="ModList\ModInfo.cs" />
@@ -107,6 +107,7 @@
     <Compile Include="Patches\Patch_ScribeMetaHeaderUtility_TryCreateDialogsForVersionMismatchWarnings.cs" />
     <Compile Include="Patches\Patch_WindowResizer_DoResizeControl.cs" />
     <Compile Include="Patches\Patch_WorkshopItems_Events.cs" />
+    <Compile Include="UIHelpers.cs" />
     <Compile Include="Utilities\Constants.cs" />
     <Compile Include="Utilities\Debug.cs" />
     <Compile Include="Utilities\Extensions.cs" />

@@ -11,8 +11,9 @@ namespace ModManager.ModList
     public class ModFolder : ListElement
     {
         List<ListElement> _contents = new List<ListElement>();
-
         public ReadOnlyCollection<ListElement> Contents => _contents.AsReadOnly();
+
+        private bool active;
 
         public bool open = true;
 
@@ -63,11 +64,44 @@ namespace ModManager.ModList
             {
                 _contents.Insert(i, element);
             }
+
+            if(element.GetActive() != modList.Active)
+            element.SetActive(modList.Active);
+            
+        }
+
+        internal void Empty()
+        {
+            _contents.Clear();
         }
 
         public void Remove(ListElement element)
         {
-            _contents.Remove(element);
+            if (!_contents.Remove(element))
+            {
+                foreach (var item in _contents)
+                {
+                    if (item is ModFolder folder)
+                    {
+                        folder.Remove(element);
+                    }
+                }
+            }
+        }
+
+        public override void SetActive(bool act)
+        {
+            active = act;
+
+            foreach (var item in this._contents)
+            {
+                item.SetActive(active);
+            }
+        }
+
+        public override bool GetActive()
+        {
+            return active;
         }
     }
 }

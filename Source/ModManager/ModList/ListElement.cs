@@ -6,19 +6,25 @@ using System.Threading.Tasks;
 
 namespace ModManager.ModList
 {
-    [Serializable]
-    public class ListElement
+    
+    public abstract class ListElement
     {
         protected string _name;
         public string Name => _name;
 
         public int LoadOrder = 0;
 
-        public ModList modList; 
+        public ModList modList;
+
 
         public ListElement(int order = 0)
         {
             LoadOrder = order;
+        }
+
+        public void SetName(string name)
+        {
+            _name = name;
         }
 
         public virtual bool Filter(ModFilter filter)
@@ -28,5 +34,11 @@ namespace ModManager.ModList
 
             return Name.ToLower().Contains(filter.filter.ToLower());
         }
+
+
+        public abstract void SetActive(bool act);
+
+        public abstract bool GetActive();
+
     }
 }
