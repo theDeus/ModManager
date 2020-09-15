@@ -306,12 +306,6 @@ namespace ModManager
             return Key( "MoveAfter" ).Translate( TrimModName( from.Name ), TrimModName( to.Name ) );
         }
 
-        public static string SourceModChanged = Key( "SourceModChanged" ).Translate();
-
-        public static string UpdateLocalCopy( string name )
-        {
-            return Key( "UpdateLocalCopy" ).Translate( name );
-        }
 
         public static string ChangeColour = Key( "ChangeColour" ).Translate();
         public static string ChangeModColour( string name )    => Key( "ChangeModColour" ).Translate( name );
@@ -401,10 +395,33 @@ namespace ModManager
         public static string AddExpansionsToNewModListTip     = Key( "AddExpansionsToNewModListTip" ).Translate();
         public static string ShowVersionChecksForSteamMods    = Key( "ShowVersionChecksForSteamMods" ).Translate();
         public static string ShowVersionChecksForSteamModsTip = Key( "ShowVersionChecksForSteamModsTip" ).Translate();
+        public static string UseTempFolderForCrossPromotionCache = Key( "UseTempFolderForCrossPromotionCache" ).Translate();
+        public static string UseTempFolderForCrossPromotionCacheTip = Key("UseTempFolderForCrossPromotionCacheTip").Translate();
+
+        public static string CrossPromotionCacheFolderSize( long size ) => Key( "CrossPromotionCacheFolderSize" ).Translate( size.ToStringSize() );
+        public static string DeleteCrossPromotionCache = Key( "DeleteCrossPromotionCache" ).Translate();
+
+        public static string ConfirmDeletingCrossPromotionCache( string path, int count, long size ) => Key( "ConfirmDeletingCrossPromotionCache" ).Translate( path, count, size.ToStringSize() );
 
         public static string OpenDownloadUri( string downloadUri ) =>
             Key( "OpenDownloadUri" ).Translate( downloadUri ).Resolve();
 
         public static string NoDownloadUri = Key( "NoDownloadUri" ).Translate();
+
+        public static string XIsUpToDate( ModMetaData mod )
+        {
+            return Key("XIsUpToDate").Translate( mod.Name );
+        }
+
+        public static string YHasUpdated( ModMetaData target )
+        {
+            return Key("YHasUpdated").Translate( target.Name );
+        }
+
+        public static string UpdateLocalCopy( ModMetaData mod )
+        {
+            return Key( "UpdateLocalCopy" ).Translate( mod.Name );
+        }
+
     }
 }

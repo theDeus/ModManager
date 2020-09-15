@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using HarmonyLib;
 using RimWorld;
 using Verse;
 
@@ -20,11 +21,10 @@ namespace ModManager
 
         public static bool TryCreateLocalCopy( ModMetaData mod, out ModMetaData copy )
         {
-            copy = null;
-
             if ( mod.Source != ContentSource.SteamWorkshop )
             {
                 Log.Error( "Can only create local copies of steam workshop mods." );
+                copy = null;
                 return false;
             }
 
@@ -34,50 +34,125 @@ namespace ModManager
             while ( Directory.Exists( targetDir ) )
                 targetDir = $"{baseTargetDir} ({i++})";
 
-            return TryCopyMod( mod, ref copy, targetDir );
+            return TryCopyMod( mod, out copy, targetDir );
         }
 
         public static bool TryUpdateLocalCopy( ModMetaData source, ModMetaData local )
         {
             // delete and re-copy mod.
-            var updateResult = TryRemoveLocalCopy( local ) && TryCopyMod( source, ref local, local.RootDir.FullName, false );
-            if ( !updateResult )
+            var removedResult = TryRemoveLocalCopy( local );
+            if ( !removedResult )
                 return false;
 
-            // rename settings file
-            TryCopySettings( source, local, true );
-
+            var updateResult = TryCopyMod( source, out var updated, local.RootDir.FullName, false );
+            if ( !updateResult )
+                return false;
+            
             // update version 
-            ModButton_Installed.For( source ).Notify_VersionUpdated( local );
+            var button = ModButton_Installed.For( updated );
+            button.Notify_VersionRemoved( local );
+            button.Notify_VersionAdded( updated, true );
+
+
             return true;
         }
 
-        private static bool TryCopyMod( ModMetaData mod, ref ModMetaData copy, string targetDir, bool copySettings = true )
+        private static bool TryCopyMod( ModMetaData mod, out ModMetaData copy, string targetDir, bool copySettings = true, bool copyUserData = true )
         {
             try
             {
                 // copy mod
                 mod.RootDir.Copy( targetDir, true );
                 copy = new ModMetaData( targetDir );
+                SetUniquePackageId( copy );
+                ModManager.UserData[copy].Source = mod;
+                var manifest = copy.GetManifest();
+                manifest.sourceSync = new SourceSync( manifest, mod.PackageId );
+
                 ( ModLister.AllInstalledMods as List<ModMetaData> )?.Add( copy );
 
                 // copy settings and color attribute
                 if ( copySettings )
-                {
                     TryCopySettings( mod, copy );
-                    ModManager.Settings[copy].Color = ModManager.Settings[mod].Color;
-                }
+
+                if ( copyUserData )
+                    TryCopyUserData( mod, copy );
 
                 // set source attribute
-                ModManager.Settings[copy].Source = mod;
+                ModManager.UserData[copy].Source = mod;
 
                 return true;
             }
             catch ( Exception e )
             {
                 Log.Error( $"Creating local copy failed: {e.Message} \n\n{e.StackTrace}" );
+                copy = null;
                 return false;
             }
+        }
+
+        private static bool TryCopyUserData( ModMetaData source, ModMetaData target, bool deleteOld = false )
+        {
+            try
+            {
+                var sourcePath = UserData.GetModAttributesPath( source );
+                if ( !File.Exists(sourcePath ) ) return true;
+                
+                File.Copy( sourcePath, UserData.GetModAttributesPath( target ), true );
+                if ( deleteOld )
+                    File.Delete(sourcePath );
+                return true;
+            }
+            catch ( Exception err )
+            {
+                Debug.Error( $"Error copying user settings: " +
+                             $"\n\tsource: {source.Name}"     +
+                             $"\n\ttarget: {target.Name}"     +
+                             $"\n\terror: {err}");
+            }
+
+            return false;
+        }
+
+        private static void SetUniquePackageId( ModMetaData mod )
+        {
+            var id       = GetUniquePackageId( mod );
+            UpdatePackageId_ModMetaData( mod, id );
+            UpdatePackageId_Xml( mod, id );
+        }
+
+        private static void UpdatePackageId_ModMetaData( ModMetaData mod, string id )
+        {
+            var traverse = Traverse.Create( mod );
+            traverse.Field( "meta" ).Field( "traverse" ).SetValue( id );
+            traverse.Field( "packageIdLowerCase" ).SetValue( id.ToLower() );
+        }
+
+        private static void UpdatePackageId_Xml( ModMetaData mod, string id )
+        {
+            var filePath = Path.Combine( mod.AboutDir(), "About.xml" );
+            var meta = new XmlDocument();
+            meta.Load( filePath );
+            var node = meta.SelectSingleNode( "ModMetaData/packageId" );
+            if ( node == null )
+            {
+                Debug.Error( $"packageId node not found for {mod.Name}!" );
+            }
+            else
+            {
+                node.InnerText = id;
+                meta.Save( filePath );
+            }
+        }
+
+        private static string GetUniquePackageId( ModMetaData mod )
+        {
+            var baseId = mod.PackageIdPlayerFacing + LocalCopyPostfix;
+            var id     = baseId;
+            var i      = 1;
+            while ( ModLister.GetModWithIdentifier( id ) != null )
+                id = baseId + "_" + i++;
+            return id;
         }
 
         private static Regex SettingsMask( string identifier )
@@ -95,13 +170,13 @@ namespace ModManager
         private static void TryCopySettings( ModMetaData source, ModMetaData target, bool deleteOld = false )
         {
             // find any settings files that belong to the source mod
-            var mask = SettingsMask( source.PackageId );
+            var mask = SettingsMask( source.FolderName );
             var settings = Directory.GetFiles( GenFilePaths.ConfigFolderPath )
                 .Where( f => mask.IsMatch( f ) )
                 .Select( f => new
                 {
                     source = f,
-                    target = NewSettingsFilePath( f, mask, target.PackageId )
+                    target = NewSettingsFilePath( f, mask, target.FolderName )
                 } );
 
             // copy settings files, overwriting existing - if any.
@@ -126,6 +201,7 @@ namespace ModManager
             try
             {
                 mod.RootDir.Delete( true );
+                TryRemoveUserData( mod );
                 ( ModLister.AllInstalledMods as List<ModMetaData> )?.TryRemove( mod );
                 return true;
             }
@@ -137,6 +213,31 @@ namespace ModManager
             }
         }
 
+        private static void TryRemoveUserData( ModMetaData mod )
+        {
+            var path = mod.UserData()?.FilePath;
+            if ( path == null ) return;
+            try
+            {
+                if ( File.Exists( path ) )
+                    File.Delete( path );
+            }
+            catch (Exception err)
+            {
+                Debug.Error( $"failed to delete {path}:\n{err}");
+            }
+        }
+
+        private static void TryRemoveSettings( ModMetaData mod )
+        {
+            // find any settings files that belong to the source mod
+            var mask = SettingsMask( mod.FolderName );
+            var settings = Directory.GetFiles( GenFilePaths.ConfigFolderPath )
+                                    .Where( f => mask.IsMatch( f ) );
+            foreach ( var file in settings )
+                File.Delete( file );
+        }
+
         public static string GetLocalCopyFolder( this ModMetaData mod )
         {
             return Path.Combine( ModsDir, $"{LocalCopyPrefix}_{mod.Name}_{DateStamp}".SanitizeFileName() );
@@ -145,21 +246,23 @@ namespace ModManager
         public static string DateStamp => $"-{DateTime.Now.Day}-{DateTime.Now.Month}";
         public static string LocalCopyPrefix => "__LocalCopy";
 
-        private static Regex _identifiersRegex = new Regex( @"(?:_steam|_copy(?:_\d+)?)$" );
-        public static string StripIdentifiers( this string packageId ) => _identifiersRegex.Replace( packageId.Trim(), "" );
+        private static Regex _postfixRegex = new Regex( $@"(?:{ModMetaData.SteamModPostfix}|{LocalCopyPostfix}(?:_\d+)?)$" );
+        public static string StripPostfixes( this string packageId ) => _postfixRegex.Replace( packageId.Trim(), "" );
+
+        public static readonly char[] invalidChars = Path.GetInvalidPathChars().Concat( Path.GetInvalidFileNameChars() ).ToArray();
+        public static readonly Regex invalidFileNameCharsRegex =
+            new Regex( string.Format( "[{0}]", Regex.Escape( new string( invalidChars ) ) ), RegexOptions.Compiled & RegexOptions.CultureInvariant );
+
+        public static readonly string[] reservedWords = new[]
+        {
+            "CON", "PRN", "AUX", "CLOCK$", "NUL", "COM0", "COM1", "COM2", "COM3", "COM4",
+            "COM5", "COM6", "COM7", "COM8", "COM9", "LPT0", "LPT1", "LPT2", "LPT3", "LPT4",
+            "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
+        };
 
         public static string SanitizeFileName( this string str)
         {
-            var invalidReStr = @"\W";
-
-            var reservedWords = new[]
-            {
-                "CON", "PRN", "AUX", "CLOCK$", "NUL", "COM0", "COM1", "COM2", "COM3", "COM4",
-                "COM5", "COM6", "COM7", "COM8", "COM9", "LPT0", "LPT1", "LPT2", "LPT3", "LPT4",
-                "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
-            };
-
-            var fileSystemSanitized = Regex.Replace(str, invalidReStr, "_" );
+            var fileSystemSanitized = invalidFileNameCharsRegex.Replace(str, "_" );
             return reservedWords
                   .Select( reservedWord => $@"^{reservedWord}\." )
                   .Aggregate( fileSystemSanitized, ( current, reservedWordPattern ) => Regex.Replace( current, reservedWordPattern, "_", RegexOptions.IgnoreCase ) );
@@ -295,6 +398,8 @@ namespace ModManager
         }
 
         private static Dictionary<string, string> _hashCache = new Dictionary<string, string>();
+        public const string LocalCopyPostfix = "_copy";
+
         internal static string GetFolderHash( this DirectoryInfo folder )
         {
             if ( _hashCache.TryGetValue( folder.FullName, out string hash ) )

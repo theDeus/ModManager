@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
+  <!-- cancel button on confirmation(s) -->
+  <Cancel>中止</Cancel>
+
   <Fluffy.ModManager.AvailableMods>利用可能</Fluffy.ModManager.AvailableMods>
   <Fluffy.ModManager.ActiveMods>有効</Fluffy.ModManager.ActiveMods>
   <Fluffy.ModManager.Preview>プレビュー</Fluffy.ModManager.Preview>
@@ -33,7 +36,6 @@
   <Fluffy.ModManager.ShouldBeLoadedBefore>{0}の上に置く必要があります.</Fluffy.ModManager.ShouldBeLoadedBefore>
   <Fluffy.ModManager.LoadedAfter>{0}よりも下に読み込まれています.</Fluffy.ModManager.LoadedAfter>
   <Fluffy.ModManager.ShouldBeLoadedAfter>{0}の下に置く必要があります.</Fluffy.ModManager.ShouldBeLoadedAfter>
-  <Fluffy.ModManager.SourceModChanged>Steam-Workshop-modの内容が更新されました.</Fluffy.ModManager.SourceModChanged>
 
   <Fluffy.ModManager.GetMoreMods_SteamWorkshop>Steam-WorkshopからもっとModを入手する</Fluffy.ModManager.GetMoreMods_SteamWorkshop>
   <Fluffy.ModManager.GetMoreMods_LudeonForums>Ludeon公式フォーラムからもっとModを入手する</Fluffy.ModManager.GetMoreMods_LudeonForums>
@@ -105,9 +107,11 @@
   <Fluffy.ModManager.DeactivateMod>{0}を無効にする.</Fluffy.ModManager.DeactivateMod>
   <Fluffy.ModManager.MoveBefore>リストの順番で{1}の上に{0}を移動してください.</Fluffy.ModManager.MoveBefore>
   <Fluffy.ModManager.MoveAfter>リストの順番で{1}の下に{0}を移動してください.</Fluffy.ModManager.MoveAfter>
-  <Fluffy.ModManager.UpdateLocalCopy>現在のSteamのWorkshopで公開されているバージョンに{0}を更新してください.</Fluffy.ModManager.UpdateLocalCopy>
   <Fluffy.ModManager.OpenDownloadUri>ダウンロード先に移動\n&lt;i&gt;{0}&lt;/i&gt;</Fluffy.ModManager.OpenDownloadUri>
   <Fluffy.ModManager.NoDownloadUri>ダウンロード先が未指定</Fluffy.ModManager.NoDownloadUri>
+  <Fluffy.ModManager.XIsUpToDate>{0}はSteam版で最新です.</Fluffy.ModManager.XIsUpToDate>
+  <Fluffy.ModManager.YHasUpdated>{0}のSteam版が更新されました.</Fluffy.ModManager.YHasUpdated>
+  <Fluffy.ModManager.UpdateLocalCopy>現在のSteamのWorkshopで公開されているバージョンに{0}を更新してください.</Fluffy.ModManager.UpdateLocalCopy>
 
   <!-- Content source -->
   <Fluffy.ModManager.ContentSource.Undefined>未定義</Fluffy.ModManager.ContentSource.Undefined>
@@ -166,4 +170,11 @@
   <Fluffy.ModManager.AddExpansionsToNewModListTip>Coreに加えて,公式DLCを新しいModリストに追加します.</Fluffy.ModManager.AddExpansionsToNewModListTip>
   <Fluffy.ModManager.ShowVersionChecksForSteamMods>SteamModのバージョン確認を表示</Fluffy.ModManager.ShowVersionChecksForSteamMods>
   <Fluffy.ModManager.ShowVersionChecksForSteamModsTip>バージョン確認は手動インストールされたMODに最適で、デフォルトではSteamMODの確認は無効になっています。これはMod作成者がこの機能を明示的にサポートしている場合か、手動でインストールされた新しいMODについてだけ通知されることに注意してください。新しいSteamModのバージョンが出ても通知しません。</Fluffy.ModManager.ShowVersionChecksForSteamModsTip>
+
+  <Fluffy.ModManager.UseTempFolderForCrossPromotionCache>OSシステムの一時(TMP)フォルダをMod宣伝キャッシュに使用</Fluffy.ModManager.UseTempFolderForCrossPromotionCache>
+  <Fluffy.ModManager.UseTempFolderForCrossPromotionCacheTip>有効にすると、Mod宣伝キャッシュは一時(TMP)フォルダーに保存されます。これにより、Mod宣伝画像の取得が遅くなる可能性がありますが、システム側は定期的にキャッシュを消去可能になります。</Fluffy.ModManager.UseTempFolderForCrossPromotionCacheTip>
+  <Fluffy.ModManager.CrossPromotionCacheFolderSize>宣伝キャッシュサイズ：{0}</Fluffy.ModManager.CrossPromotionCacheFolderSize>
+  <Fluffy.ModManager.DeleteCrossPromotionCache>宣伝キャッシュを掃除</Fluffy.ModManager.DeleteCrossPromotionCache>
+  <Fluffy.ModManager.ConfirmDeletingCrossPromotionCache>キャッシュを掃除してもよろしいですか？\n\nその結果{0}内の{1}ファイルすべてが完全に削除されて、{2}が解放されます。</Fluffy.ModManager.ConfirmDeletingCrossPromotionCache>
+
 </LanguageData>

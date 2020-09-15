@@ -1,10 +1,6 @@
 ﻿// Debug.cs
 // Copyright Karel Kroeze, 2018-2018
-#define TRACE_DEPENDENCIES
-
-
 using System.Diagnostics;
-using Verse;
 
 namespace ModManager
 {
@@ -24,6 +20,7 @@ namespace ModManager
         public static void TraceDependencies( string message ) =>
             Verse.Log.Message( "Mod Manager :: Dependencies :: " + message, true );
 
+        public static void Error( string msg ) => Verse.Log.Error( "Mod Manager :: " + msg );
 
     }
 }

@@ -15,8 +15,8 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>../../Assemblies</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -92,6 +92,7 @@
     <Compile Include="Dependencies\Dependency.cs" />
     <Compile Include="Dependencies\Incompatible.cs" />
     <Compile Include="Dependencies\LoadOrder.cs" />
+    <Compile Include="Dependencies\SourceSync.cs" />
     <Compile Include="Dependencies\VersionCheck.cs" />
     <Compile Include="Dependencies\VersionedDependency.cs" />
     <Compile Include="ModButton\ButtonAttributes.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="ModButton\ModButton_Downloading.cs" />
     <Compile Include="ModList\ModIdentifier.cs" />
     <Compile Include="ModManagerSettings.cs" />
+    <Compile Include="Patches\Patch_ModMetaData_PackageId.cs" />
     <Compile Include="Patches\Patch_ScribeMetaHeaderUtility_TryCreateDialogsForVersionMismatchWarnings.cs" />
     <Compile Include="Patches\Patch_WindowResizer_DoResizeControl.cs" />
     <Compile Include="Patches\Patch_WorkshopItems_Events.cs" />
@@ -121,6 +123,7 @@
     <Compile Include="Page_BetterModConfig.cs" />
     <Compile Include="ModList\ModListManager.cs" />
     <Compile Include="Utilities\Resources.cs" />
+    <Compile Include="Utilities\UserData.cs" />
     <Compile Include="Utilities\Utilities.cs" />
     <Compile Include="Utilities\Workshop.cs" />
   </ItemGroup>

@@ -24,7 +24,7 @@ namespace ModManager
             get
             {
                 if ( _allButtons == null )
-                    RecacheModButtons();
+                    InitializeModButtons();
                 return _allButtons;
             }
         }
@@ -34,7 +34,7 @@ namespace ModManager
             get
             {
                 if ( _activeButtons == null )
-                    RecacheModButtons();
+                    InitializeModButtons();
                 return _activeButtons;
             }
         }
@@ -44,7 +44,7 @@ namespace ModManager
             get
             {
                 if ( _availableButtons == null )
-                    RecacheModButtons();
+                    InitializeModButtons();
                 return _availableButtons;
             }
         }
@@ -58,9 +58,7 @@ namespace ModManager
         {
             get
             {
-                if ( _activeMods == null )
-                    _activeMods = ActiveButtons.OfType<ModButton_Installed>().Select( b => b.Selected ).ToList();
-                return _activeMods;
+                return _activeMods ??= ActiveButtons.OfType<ModButton_Installed>().Select( b => b.Selected ).ToList();
             }
         }
 
@@ -93,21 +91,8 @@ namespace ModManager
             _availableButtons.TryRemove( mod );
         }
 
-        public static ModAttributes AttributesFor( ModButton button )
+        internal static void InitializeModButtons()
         {
-            if ( button is ModButton_Installed installed )
-                return AttributesFor( installed.Selected );
-            return null;
-        }
-
-        public static ModAttributes AttributesFor( ModMetaData mod )
-        {
-            return ModManager.Settings[mod];
-        }
-
-        internal static void RecacheModButtons()
-        {
-            Debug.Log( "Recaching ModButtons" );
             _allButtons       = new List<ModButton>();
             _activeButtons    = new List<ModButton>();
             _availableButtons = new List<ModButton>();
@@ -140,14 +125,30 @@ namespace ModManager
             foreach ( var mod in ActiveMods )
                 mod.GetManifest().Notify_Recache();
         }
-        
-        public static void Notify_ModListChanged()
+
+        private static void Notify_RecacheAllModButtons()
+        {
+            foreach ( var button in AllButtons )
+                button.Notify_RecacheIssues();
+        }
+
+        public static void Notify_RecacheModMetaData()
         {
             _activeMods = null;
-            ModsConfig.SetActiveToList( ActiveMods.Select( m => m.PackageId ).ToList() );
+        }
 
+        public static void Notify_ModListChanged()
+        {
+            Notify_RecacheModMetaData();
+            ModsConfig.SetActiveToList( ActiveMods.Select( m => m.PackageId ).ToList() );
+            Notify_RecacheIssues();
+        }
+
+        public static void Notify_RecacheIssues()
+        {
             Notify_RecacheIssuesList();
             Notify_RecacheAllManifests();
+            Notify_RecacheAllModButtons();
         }
 
         public static ModButton_Installed CoreMod => AllButtons.First( b => b.IsCoreMod ) as ModButton_Installed;
@@ -238,7 +239,7 @@ namespace ModManager
             TryRemove(downloading);
             TryRemove(missing);
 
-            Page_BetterModConfig.Instance.Notify_ModsListChanged();
+            // Page_BetterModConfig.Instance.Notify_ModsListChanged();
         }
 
         public static void Notify_RecacheIssuesList()
@@ -259,6 +260,7 @@ namespace ModManager
 
         public static void Sort()
         {
+            // ReSharper disable once InvalidXmlDocComment
             /**
              * Topological sort.
              * Depth first, because it's the easiest to understand.
@@ -314,6 +316,8 @@ namespace ModManager
                 {
                     var targetButton = ModButton_Installed.For( target );
                     graph[activeButton].Add( targetButton );
+                    if ( !graph.ContainsKey( targetButton ) )
+                        graph[targetButton] = new HashSet<ModButton>();
                 }
             }
 

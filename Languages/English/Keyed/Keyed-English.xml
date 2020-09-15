@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LanguageData>
+    <!-- cancel button on confirmation(s) -->
+    <Cancel>Cancel</Cancel>
+
     <Fluffy.ModManager.AvailableMods>Available</Fluffy.ModManager.AvailableMods>
     <Fluffy.ModManager.ActiveMods>Active</Fluffy.ModManager.ActiveMods>
     <Fluffy.ModManager.Preview>Preview</Fluffy.ModManager.Preview>
@@ -33,7 +36,6 @@
     <Fluffy.ModManager.ShouldBeLoadedBefore>Should be loaded before {0}.</Fluffy.ModManager.ShouldBeLoadedBefore>
     <Fluffy.ModManager.LoadedAfter>Is loaded after {0}.</Fluffy.ModManager.LoadedAfter>
     <Fluffy.ModManager.ShouldBeLoadedAfter>Should be loaded after {0}.</Fluffy.ModManager.ShouldBeLoadedAfter>
-    <Fluffy.ModManager.SourceModChanged>The source Steam Workshop mod has been updated.</Fluffy.ModManager.SourceModChanged>
 
     <Fluffy.ModManager.GetMoreMods_SteamWorkshop>Get more mods from the Steam Workshop</Fluffy.ModManager.GetMoreMods_SteamWorkshop>
     <Fluffy.ModManager.GetMoreMods_LudeonForums>Get more mods from the Ludeon Forums</Fluffy.ModManager.GetMoreMods_LudeonForums>
@@ -105,9 +107,11 @@
     <Fluffy.ModManager.DeactivateMod>Deactivate {0}.</Fluffy.ModManager.DeactivateMod>
     <Fluffy.ModManager.MoveBefore>Move {0} to load before {1}.</Fluffy.ModManager.MoveBefore>
     <Fluffy.ModManager.MoveAfter>Move {0} to load after {1}.</Fluffy.ModManager.MoveAfter>
-    <Fluffy.ModManager.UpdateLocalCopy>Update {0} to the current Steam Workshop version.</Fluffy.ModManager.UpdateLocalCopy>
     <Fluffy.ModManager.OpenDownloadUri>Go to download location\n&lt;i&gt;{0}&lt;/i&gt;</Fluffy.ModManager.OpenDownloadUri>
     <Fluffy.ModManager.NoDownloadUri>No download location provided.</Fluffy.ModManager.NoDownloadUri>
+    <Fluffy.ModManager.XIsUpToDate>{0} is up to date with the steam version.</Fluffy.ModManager.XIsUpToDate>
+    <Fluffy.ModManager.YHasUpdated>The steam version of {0} has updated.</Fluffy.ModManager.YHasUpdated>
+    <Fluffy.ModManager.UpdateLocalCopy>Update {0} to the current steam version.</Fluffy.ModManager.UpdateLocalCopy>
 
     <!-- Content source -->
     <Fluffy.ModManager.ContentSource.Undefined>Undefined</Fluffy.ModManager.ContentSource.Undefined>
@@ -166,4 +170,13 @@
     <Fluffy.ModManager.AddExpansionsToNewModListTip>Add official expansions to new modlists whenever the modlist is reset.</Fluffy.ModManager.AddExpansionsToNewModListTip>
     <Fluffy.ModManager.ShowVersionChecksForSteamMods>Show version checks for steam mods.</Fluffy.ModManager.ShowVersionChecksForSteamMods>
     <Fluffy.ModManager.ShowVersionChecksForSteamModsTip>Version checks are most useful for manually installed mods, so are disabled for steam mods by default. Note that this will only notify about newer manually installed mods where the author has explicitly supported this functionality. It will not notify about new steam mods.</Fluffy.ModManager.ShowVersionChecksForSteamModsTip>
+    <Fluffy.ModManager.UseTempFolderForCrossPromotionCache>Use system temp folder for cross promotion cache</Fluffy.ModManager.UseTempFolderForCrossPromotionCache>
+    <Fluffy.ModManager.UseTempFolderForCrossPromotionCacheTip>If enabled, the cross promotion cache will be stored in a temporary folder. This may slow down getting cross promotion images, but allows the system to periodically clean out the cache.</Fluffy.ModManager.UseTempFolderForCrossPromotionCacheTip>
+    <Fluffy.ModManager.CrossPromotionCacheFolderSize>Cache size: {0}</Fluffy.ModManager.CrossPromotionCacheFolderSize>
+    <Fluffy.ModManager.DeleteCrossPromotionCache>Clear cache</Fluffy.ModManager.DeleteCrossPromotionCache>
+    <Fluffy.ModManager.ConfirmDeletingCrossPromotionCache>Are you sure you want to clear the cache?\n\nThis will irrevocably remove all {1} file(s) in {0}, freeing {2}.</Fluffy.ModManager.ConfirmDeletingCrossPromotionCache>
+
+
+
+
 </LanguageData>

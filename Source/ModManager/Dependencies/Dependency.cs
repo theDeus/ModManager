@@ -15,17 +15,27 @@ namespace ModManager
 {
     public abstract class Dependency : ModDependency
     {
-        public Manifest parent;
-
-        public ModMetaData Target
+        public    Manifest    parent;
+        protected ModMetaData _target;
+        protected bool        _targetResolved;
+        public virtual ModMetaData Target
         {
-            get =>
-                _target ?? ( _target = ModLister.GetActiveModWithIdentifier( packageId ) ??
-                                       ModLister.GetModWithIdentifier( packageId, true ) );
-            set => _target = value;
+            get
+            {
+                if ( _targetResolved ) return _target;
+                
+                // we don't want to just re-resolve _target if it's null, as we 
+                // might have quite a few mods listing other dependencies that 
+                // are not installed.
+                _target = ModLister.GetActiveModWithIdentifier( packageId ) ??
+                          ModLister.GetModWithIdentifier( packageId, true );
+                _targetResolved = true;
+                return _target;
+            }
         }
-        
-        public virtual int Severity => 1;
+
+        // todo: add enum for severity
+        public virtual int Severity => IsSatisfied ? 0 : 1;
 
         public virtual Color Color => Color.white;
 
@@ -33,8 +43,8 @@ namespace ModManager
 
         public virtual void Notify_Recache()
         {
-            satisfied = null;
-            Target = null;
+            satisfied       = null;
+            _targetResolved = false;
         }
 
         public override bool IsSatisfied {
@@ -61,8 +71,6 @@ namespace ModManager
         public override Texture2D StatusIcon => Resources.Warning;
 
         public static Regex packageIdFormatRegex = new Regex(@"(?=.{1,60}$)^(?:[a-z0-9]+\.)+[a-z0-9]+$", RegexOptions.IgnoreCase );
-        private ModMetaData _target;
-
         public const string InvalidPackageId = "invalid.package.id";
 
         public static bool TryGetPackageIdFromIdentifier( string identifier, out string packageId )
@@ -71,13 +79,13 @@ namespace ModManager
             var modByFolder = allMods.Find( m => m.FolderName.StripSpaces() == identifier );
             if ( modByFolder != null )
             {
-                packageId = modByFolder.PackageId;
+                packageId = modByFolder.PackageId.StripPostfixes();
                 return true;
             }
             var modByName = allMods.Find( m => m.Name.StripSpaces() == identifier );
             if ( modByName != null )
             {
-                packageId = modByName.PackageId;
+                packageId = modByName.PackageId.StripPostfixes();
                 return true;
             }
 
@@ -85,11 +93,10 @@ namespace ModManager
             return false;
         }
 
-        public Dependency( Manifest parent, string packageId, bool ignorePostfix = true )
+        public Dependency( Manifest parent, string packageId )
         {
             this.parent    = parent;
             this.packageId = packageId;
-            Target         = ModLister.GetModWithIdentifier( packageId, ignorePostfix );
         }
 
         public Dependency( Manifest parent, ModDependency depend ): this( parent, depend.packageId )
@@ -121,8 +128,6 @@ namespace ModManager
                 {
                     packageId = text;
                 }
-
-                Target = ModLister.GetModWithIdentifier( packageId, true );
             }
             catch ( Exception ex )
             {

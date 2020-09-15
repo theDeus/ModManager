@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using RimWorld;
@@ -180,7 +179,7 @@ namespace ModManager
             {
                 var id   = _modIds[i];
                 var name = _modNames[i];
-                var mod = ModLister.GetModWithIdentifier( id.StripIdentifiers(), true );
+                var mod = ModLister.GetModWithIdentifier( id.StripPostfixes(), true );
                 if ( mod != null )
                 {
                     var button = ModButton_Installed.For( mod );

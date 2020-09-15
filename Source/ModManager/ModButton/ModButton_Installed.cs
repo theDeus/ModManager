@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ColourPicker;
 using HarmonyLib;
 using RimWorld;
 using Steamworks;
@@ -114,12 +115,12 @@ namespace ModManager
             get
             {
                 // use version colour if set
-                if ( ModManager.Settings[Selected].Color != Color.white )
-                    return ModManager.Settings[Selected].Color;
+                if ( ModManager.UserData[Selected].Color != Color.white )
+                    return ModManager.UserData[Selected].Color;
 
                 // then button colour
-                if ( ModManager.Settings[this].Color != Color.white )
-                    return ModManager.Settings[this].Color;
+                if ( ModManager.UserData[this].Color != Color.white )
+                    return ModManager.UserData[this].Color;
 
                 // if this mod is included in any lists, use that colour
                 if ( !Lists.NullOrEmpty() )
@@ -133,7 +134,7 @@ namespace ModManager
                 // if nothing stuck, use default
                 return Color.white;
             }
-            set => ModManager.Settings[this].Color = value;
+            set => ModManager.UserData[this].Color = value;
         }
 
         public override void DoModButton( 
@@ -223,8 +224,7 @@ namespace ModManager
         {
             if ( mod.VersionCompatible )
                 return I18n.CurrentVersion;
-            else
-                return I18n.DifferentVersion( mod );
+            return I18n.DifferentVersion( mod );
         }
 
         internal virtual void DoSourceButtons(Rect canvas)
@@ -304,9 +304,13 @@ namespace ModManager
             {
                 var options = NewOptionsList;
                 options.Add( new FloatMenuOption( I18n.ChangeModColour( Name ), () => Find.WindowStack.Add(
-                    new ColourPicker.Dialog_ColourPicker( Color, color => ModManager.Settings[Selected].Color = color ) ) ) );
+                    new Dialog_ColourPicker( Color, color =>
+                                                 ModManager.UserData[Selected].Color = color
+                     ) ) ) );
                 options.Add( new FloatMenuOption( I18n.ChangeButtonColour( Name ), () => Find.WindowStack.Add(
-                    new ColourPicker.Dialog_ColourPicker( Color, color => ModManager.Settings[this].Color = color ) ) ) );
+                    new Dialog_ColourPicker( Color, color =>
+                                                 ModManager.UserData[this].Color = color
+                     ) ) ) );
                 FloatMenu( options );
             }
             if ( Selected.HasSettings() && ButtonIcon( ref iconRect, Gear, I18n.ModSettings ) )
@@ -349,11 +353,15 @@ namespace ModManager
             {
                 var options2 = NewOptionsList;
                 options2.Add( new FloatMenuOption( I18n.ChangeModColour( Name ), () => Find.WindowStack.Add(
-                    new ColourPicker.Dialog_ColourPicker( Color,
-                        color => ModManager.Settings[Selected].Color = color ) ) ) );
+                    new Dialog_ColourPicker( Color,
+                                             color =>
+                        
+                                                 ModManager.UserData[Selected].Color = color
+                         ) ) ) );
                 options2.Add( new FloatMenuOption( I18n.ChangeButtonColour( Name ), () => Find.WindowStack.Add(
-                    new ColourPicker.Dialog_ColourPicker( Color,
-                        color => ModManager.Settings[this].Color = color ) ) ) );
+                    new Dialog_ColourPicker( Color,
+                                             color => ModManager.UserData[this].Color = color
+                         ) ) ) );
                 FloatMenu(options2);
             } ) );
             if ( Selected.HasSettings() )
@@ -382,10 +390,19 @@ namespace ModManager
                     }
                     if ( Selected?.Source == ContentSource.SteamWorkshop )
                     {
-                        var publishedFileId = Selected.GetWorkshopItemHook().PublishedFileId;
+                        var publishedFileId = Selected.GetPublishedFileId();
                         _titleLinkOptions.Add(
                             new FloatMenuOption( I18n.WorkshopPage( Selected.Name ),
                             () => SteamUtility.OpenWorkshopPage( publishedFileId ) ) );
+                    }
+
+                    var source = Selected?.UserData()?.Source;
+                    if ( Selected?.Source == ContentSource.ModsFolder && source != null )
+                    {
+                        var publishedFileId = source.GetPublishedFileId();
+                        _titleLinkOptions.Add(
+                            new FloatMenuOption( I18n.WorkshopPage( source.Name ),
+                                                 () => SteamUtility.OpenWorkshopPage( publishedFileId ) ) );
                     }
                 }
                 return _titleLinkOptions;
@@ -478,13 +495,26 @@ namespace ModManager
                 GUI.color = Color.white;
                 authorRect.xMin += labelWidth + SmallMargin;
                 Widgets.Label(authorRect, mod.Author.Truncate(authorRect.width));
-                if ( mod.Source == ContentSource.SteamWorkshop )
+                ModMetaData steamMod;
+                switch ( mod.Source )
                 {
-                    var authorId = Traverse.Create( mod.GetWorkshopItemHook() )
+                    case ContentSource.ModsFolder:
+                        steamMod = mod.UserData()?.Source;
+                        break;
+                    case ContentSource.SteamWorkshop:
+                        steamMod = mod;
+                        break;
+                    default:
+                        steamMod = null;
+                        break;
+                }
+                if (steamMod != null && SteamManager.Initialized )
+                {
+                    var authorId = Traverse.Create( steamMod.GetWorkshopItemHook() )
                         .Field( "steamAuthor" )
                         .GetValue<CSteamID>();
                     ActionButton( authorRect,
-                        () => SteamUtility.OpenUrl( $"https://steamcommunity.com/profiles/{authorId}/myworkshopfiles/" ) );
+                        () => SteamUtility.OpenUrl( $"https://steamcommunity.com/profiles/{authorId.GetAccountID().m_AccountID}/myworkshopfiles/" ) );
                 }
             }
 
@@ -554,13 +584,6 @@ namespace ModManager
             if ( Selected == version )
                 _selected = null;
             Selected.Active = version.Active;   
-        }
-
-        public void Notify_VersionUpdated( ModMetaData local )
-        {
-            var old = Versions.FirstOrDefault( m => m.PackageId == local.PackageId );
-            if ( Versions.TryRemove( old ) )
-                Notify_VersionAdded( local, true );
         }
     }
 }

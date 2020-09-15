@@ -56,6 +56,7 @@ namespace ModManager
         public static Page_BetterModConfig Instance => _instance;
 
         public override Vector2 InitialSize => StandardSize;
+        
         public static Vector2 MinimumSize => StandardSize * 2 / 3f;
 
         public ModButton Selected
@@ -63,7 +64,11 @@ namespace ModManager
             get => _selected;
             set
             {
+                if ( _selected == value )
+                    return; 
+
                 _selected = value;
+                CrossPromotionManager.Notify_UpdateRelevantMods();
 
                 // cop-out if null
                 if ( value == null )
@@ -903,12 +908,14 @@ namespace ModManager
                 }
             }
         }
-
+        
         public override void PreOpen()
         {
             base.PreOpen();
             _activeModsHash = ModLister.InstalledModsListHash( true );
-            ModButtonManager.RecacheModButtons();
+            ModButtonManager.InitializeModButtons();
+            ModButtonManager.Notify_RecacheModMetaData();
+            ModButtonManager.Notify_RecacheIssues();
             Selected = ModButtonManager.AvailableButtons.FirstOrDefault() ?? ModButtonManager.ActiveButtons.FirstOrDefault();
         }
 
